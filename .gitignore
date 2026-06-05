@@ -3,6 +3,8 @@
 !/.gitignore
 !/HotelHub.md
 !/docker-compose.yml
+!/docs/
+!/docs/**
 
 !/frontend/
 !/frontend/**
