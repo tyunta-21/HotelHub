@@ -1,0 +1,99 @@
+services:
+  frontend:
+    build: ./frontend
+    container_name: hotelhub-frontend
+    ports:
+      - "3000:3000"
+    env_file:
+      - ./frontend/.env.example
+    depends_on:
+      - gateway
+
+  gateway:
+    build: ./gateway
+    container_name: hotelhub-gateway
+    ports:
+      - "8080:8080"
+    env_file:
+      - ./gateway/.env.example
+    depends_on:
+      - server1
+      - server2
+
+  server1:
+    build: ./server1
+    container_name: hotelhub-server1
+    ports:
+      - "4001:4001"
+    env_file:
+      - ./server1/.env.example
+    depends_on:
+      postgres_server1:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      server2:
+        condition: service_started
+
+  server2:
+    build: ./server2
+    container_name: hotelhub-server2
+    ports:
+      - "4002:4002"
+    env_file:
+      - ./server2/.env.example
+    depends_on:
+      postgres_server2:
+        condition: service_healthy
+
+  postgres_server1:
+    image: postgres:16-alpine
+    container_name: hotelhub-postgres-server1
+    environment:
+      POSTGRES_DB: hotelhub_bookings
+      POSTGRES_USER: hotelhub
+      POSTGRES_PASSWORD: hotelhub
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_server1_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U hotelhub -d hotelhub_bookings"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  postgres_server2:
+    image: postgres:16-alpine
+    container_name: hotelhub-postgres-server2
+    environment:
+      POSTGRES_DB: hotelhub_catalog
+      POSTGRES_USER: hotelhub
+      POSTGRES_PASSWORD: hotelhub
+    ports:
+      - "5434:5432"
+    volumes:
+      - postgres_server2_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U hotelhub -d hotelhub_catalog"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: hotelhub-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  postgres_server1_data:
+  postgres_server2_data:
+  redis_data:
