@@ -1,19 +1,8 @@
 *
 
 !/.gitignore
-!/HotelHub.md
-!/docker-compose.yml
-!/docs/
-!/docs/**
-
-!/frontend/
-!/frontend/**
-!/gateway/
-!/gateway/**
-!/server1/
-!/server1/**
-!/server2/
-!/server2/**
+!/HotelHub/
+!/HotelHub/**
 
 node_modules/
 .next/
